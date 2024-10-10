@@ -1,14 +1,13 @@
 package song
 
 type Song struct {
-	ID          string
-	Name        string
-	Group       string
-	Link        string
-	Text        string
-	ReleaseDate string
-	CreatedAt   string
-	DeletedAt   string
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Group       string `json:"author"`
+	Link        string `json:"link"`
+	Text        string `json:"text"`
+	ReleaseDate string `json:"releaseDate"`
+	CreatedAt   string `json:"createdat"`
 }
 
 func (s Song) ToDTO() DTO {

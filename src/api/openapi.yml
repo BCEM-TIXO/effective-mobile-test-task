@@ -1,88 +1,226 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Music info
-  version: 0.0.1
+  title: Music Service API
+  description: API для управления музыкальными композициями и текстами
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
 paths:
-  /songs:
+  /api/songs:
     get:
+      summary: Получить список всех песен
+      description: Возвращает список всех песен с поддержкой фильтрации и пагинации
       parameters:
-        - name: song
-          in: query
-          required: false
+        - in: query
+          name: name
           schema:
             type: string
-        - name: group
-          in: query
-          required: false
+          description: Название песни для фильтрации
+        - in: query
+          name: group
           schema:
             type: string
-        - name: releaseDate
-          in: query
-          required: false
+          description: Группа или исполнитель для фильтрации
+        - in: query
+          name: text
           schema:
             type: string
-        - name: text
-          in: query
-          required: false
+          description: Текст песни для фильтрации
+        - in: query
+          name: link
           schema:
             type: string
-        - name: link
-          in: query
-          required: false
+          description: Ссылка на песню для фильтрации
+        - in: query
+          name: releasedate
           schema:
             type: string
+            format: date
+          description: Дата выпуска песни для фильтрации
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Количество записей на странице
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Смещение для пагинации
       responses:
         '200':
-          description: Ok
+          description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SongDetail'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
         '400':
-          description: Bad request
-        '500':
-          description: Internal server error
-          
-  /info:
+          description: Некорректный запрос
+
+  /api/songs/{songId}/lyrics:
     get:
+      summary: Получить текст песни по ID
+      description: Возвращает текст песни по её ID с поддержкой пагинации
       parameters:
-        - name: group
-          in: query
+        - in: path
+          name: songId
           required: true
           schema:
             type: string
-        - name: song
-          in: query
-          required: true
+          description: ID песни
+        - in: query
+          name: limit
           schema:
-            type: string
+            type: integer
+            default: 10
+          description: Количество строк текста на странице
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Смещение для пагинации текста
       responses:
         '200':
-          description: Ok
+          description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SongDetail'
+                type: string
+                example: "Текст песни"
+        '404':
+          description: Песня не найдена
+
+  /api/songs/{songId}/remove:
+    delete:
+      summary: Удалить песню
+      description: Удаляет песню по ID
+      parameters:
+        - in: path
+          name: songId
+          required: true
+          schema:
+            type: string
+          description: ID песни
+      responses:
+        '204':
+          description: Песня успешно удалена
+        '404':
+          description: Песня не найдена
+
+  /api/songs/{songId}/edit:
+    patch:
+      summary: Обновить данные песни
+      description: Редактирует данные о песне по её ID
+      parameters:
+        - in: path
+          name: songId
+          required: true
+          schema:
+            type: string
+          description: ID песни
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DTO'
+      responses:
+        '200':
+          description: Песня обновлена
         '400':
-          description: Bad request
-        '500':
-          description: Internal server error
+          description: Некорректный запрос
+        '404':
+          description: Песня не найдена
+
+  /api/songs/{songId}/new:
+    post:
+      summary: Создать новую песню
+      description: Создает новую песню по её ID
+      parameters:
+        - in: path
+          name: songId
+          required: true
+          schema:
+            type: string
+          description: ID песни
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSongDTO'
+      responses:
+        '201':
+          description: Песня создана
+        '400':
+          description: Некорректный запрос
+
 components:
   schemas:
-    SongDetail:
-      required:
-        - releaseDate
-        - text
-        - link
+    Song:
       type: object
       properties:
-        releaseDate:
+        id:
           type: string
-          example: 16.07.2006
-        text:
+          description: Уникальный идентификатор песни
+        name:
           type: string
-          example: Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight
+          description: Название песни
+        author:
+          type: string
+          description: Название группы или исполнителя
         link:
           type: string
-          example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+          description: Ссылка на песню
+        text:
+          type: string
+          description: Текст песни
+        releaseDate:
+          type: string
+          format: date
+          description: Дата выпуска песни
+        createdat:
+          type: string
+          format: date-time
+          description: Дата создания записи
 
+    CreateSongDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название песни
+        group:
+          type: string
+          description: Название группы или исполнителя
+
+    DTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название песни
+        author:
+          type: string
+          description: Название группы или исполнителя
+        releaseDate:
+          type: string
+          format: date
+          description: Дата выпуска песни
+        text:
+          type: string
+          description: Текст песни
+        link:
+          type: string
+          description: Ссылка на песню
+        createdat:
+          type: string
+          format: date-time
+          description: Дата создания записи

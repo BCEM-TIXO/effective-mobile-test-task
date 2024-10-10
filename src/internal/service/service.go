@@ -63,7 +63,6 @@ func (s *Service) Run() {
 	// Инициализация маршрутизатора
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/ping", s.Ping).Methods("GET")
 
 	songsRouter := apiRouter.PathPrefix("/songs").Subrouter()
 	songsRouter.Use(setJSONContentType)
