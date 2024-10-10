@@ -1,12 +1,10 @@
 package service
 
 import (
-	// "context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
-	// repeatable "musiclib/pkg/utils"
-	// "github.com/gorilla/mux"
 )
 
 func (s *Service) paginationMethodMW(next http.HandlerFunc) http.HandlerFunc {
@@ -22,6 +20,7 @@ func (s *Service) paginationMethodMW(next http.HandlerFunc) http.HandlerFunc {
 		var err error
 		s.qm.Pagination.Limit, err = strconv.Atoi(limit)
 		if err != nil || s.qm.Pagination.Limit < 0 {
+			s.logger.Error("Error with limit", slog.String("limit", limit))
 			w.WriteHeader(400)
 			bytes, _ := json.Marshal(Reason{Reason: "Неверный формат запроса или его параметры."})
 			w.Write(bytes)
@@ -29,6 +28,7 @@ func (s *Service) paginationMethodMW(next http.HandlerFunc) http.HandlerFunc {
 		}
 		s.qm.Pagination.Offset, err = strconv.Atoi(offset)
 		if err != nil || s.qm.Pagination.Offset < 0 {
+			s.logger.Error("Error with offset", slog.String("offset", offset))
 			w.WriteHeader(400)
 			bytes, _ := json.Marshal(Reason{Reason: "Неверный формат запроса или его параметры."})
 			w.Write(bytes)

@@ -7,6 +7,8 @@ import (
 
 type Config struct {
 	ServerAddress string `env:"SERVER_ADDRESS" env-default:"0.0.0.0:8080"`
+	ApiAddres     string `env:"API_ADDRESS" env-default:"localhost:8888"`
+	Env           string `env:"ENVIRONMENT" env-default:"local"`
 	Storage       StorageConfig
 }
 
@@ -25,7 +27,7 @@ var once sync.Once
 func GetConfig() *Config {
 	once.Do(func() {
 		instance = &Config{}
-		if err := cleanenv.ReadEnv(instance); err != nil {
+		if err := cleanenv.ReadConfig(".env", instance); err != nil {
 			return
 		}
 	})

@@ -1,24 +1,22 @@
 package migration
 
 import (
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
 )
 
 func RunMigrations(pool *pgxpool.Pool) error {
-	db := stdlib.OpenDBFromPool(pool)
-	goose.SetBaseFS(nil)
-	opts := goose.WithNoVersioning()
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "migrations", opts); err != nil {
-		panic(err)
-	}
-	if err := db.Close(); err != nil {
-		panic(err)
-	}
-	return nil
+	q := `CREATE TABLE IF NOT EXISTS song (
+    id SERIAL PRIMARY KEY,
+    group_name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    release_date DATE,
+    text TEXT,
+    link VARCHAR(512),
+		is_deleted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
+	_, err := pool.Exec(context.Background(), q)
+	return err
 }
