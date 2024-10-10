@@ -6,6 +6,7 @@ type CreateSongDTO struct {
 }
 
 type DTO struct {
+	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Group       string `json:"author"`
 	ReleaseDate string `json:"releaseDate"`
@@ -16,6 +17,7 @@ type DTO struct {
 
 func (s DTO) ToSong() Song {
 	return Song{
+		ID:          s.ID,
 		Name:        s.Name,
 		Group:       s.Group,
 		Link:        s.Link,

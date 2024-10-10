@@ -35,11 +35,11 @@ func applyDateFilter(query sq.SelectBuilder, filter *song.ReleaseDateFilter) err
 }
 
 func (r *repository) Create(ctx context.Context, s *song.Song) error {
-	q := `INSERT INTO tender 
+	q := `INSERT INTO song 
 			(name, group, text, link, release_date) 
 		  VALUES
 			($1, $2, $3, $4, $5)
-		  RETURNING id, status, created_at, version`
+		  RETURNING id, created_at`
 	err := r.client.QueryRow(
 		ctx, q, s.Name, s.Group,
 		s.Text, s.Link, s.ReleaseDate).Scan(&s.ID, &s.CreatedAt)
@@ -114,6 +114,8 @@ func (r *repository) FindOne(ctx context.Context, id string) (song.Song, error) 
 			id, name, group_name, text, link, release_date, created_at
 		  FROM song
 		  WHERE id = $1
+			AND
+			is_deleted FALSE
 		  `
 	row := r.client.QueryRow(ctx, q, id)
 	var s song.Song
